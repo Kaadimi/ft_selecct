@@ -1,4 +1,4 @@
-# include <unistd.h>
+ # include <unistd.h>
 # include <stdlib.h>
 # include <stdio.h>
 #include <sys/ioctl.h>
@@ -18,11 +18,13 @@
 # define UP (buf[2] == 65 && buf[1] == 91 && buf[0] == 27)
 # define DOWN (buf[2] == 66 && buf[1] == 91 && buf[0] == 27)
 
+
+
 typedef struct			s_files
 {
 	char				*name;
 	int					selected;
-	int					deleted;
+	int					removed;
 	int					underline;
 	struct s_files	*next;
 	struct s_files	*prev;
@@ -33,3 +35,12 @@ typedef struct			s_dimesions
 	int					col;
 	int					row;
 }						t_dimensions;
+
+void					select_right(t_files *t);
+void    				select_left(t_files *t);
+void    				select_choice(t_files *t);
+void					remove_choice(t_files *t);
+void					free_list(t_files *t);
+void					print_selected(t_files *t);
+struct termios 			*reset_terminal(struct termios *term);
+int						ft_outc(int c);

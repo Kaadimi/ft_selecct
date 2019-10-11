@@ -2,7 +2,17 @@
 
 int		ft_outc(int c)
 {
-	return ((int)write(STDIN_FILENO, &c, 1));
+	return ((int)write(2, &c, 1));
+}
+
+int     ft_intlen(const char *str)
+{
+    int i;
+
+    i = 0;
+    while (str[i])
+        i++;
+    return (i);
 }
 
 void	set_input_mode(void)
@@ -10,38 +20,132 @@ void	set_input_mode(void)
 	char			*term_name;
 	struct termios	termios;
 
-	if (!isatty(STDIN_FILENO))
+	if (!isatty(STDERR_FILENO))
 		exit(EXIT_FAILURE);
 	term_name = getenv("TERM");
 	if (!term_name)
 		exit(-1);
 	tgetent(NULL, term_name);
-	tcgetattr(STDIN_FILENO, &termios);
+	tcgetattr(STDERR_FILENO, &termios);
+    reset_terminal(&termios);
 	termios.c_lflag &= ~(ICANON | ECHO);
 	termios.c_cc[VMIN] = 1;
 	termios.c_cc[VTIME] = 0;
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &termios);
+	tcsetattr(STDERR_FILENO, TCSAFLUSH, &termios);
+    tputs(tgetstr("ti", NULL), 1, ft_outc);
+	tputs(tgetstr("vi", NULL), 1, ft_outc);
 }
 
-void    button_checker(char *buf)
+int     standard_space(t_files *head)
 {
-    if (buf[0] == 27 && buf[2] == 68 && buf[1] == 91)
+   int i;
+   t_files *t;
+   
+   t = head;
+   i = 0;
+   while (t)
+   {
+       if (t->removed == 0)
+       {
+           if (ft_intlen(t->name) > i)
+            i = ft_intlen(t->name);
+       }
+       t = t->next;
+   }
+   return (i);
+}
+
+void    space_adder(char *str, int len)
+{
+    int i;
+
+    i = ft_intlen(str);
+    while (i <= len)
     {
-       ft_putstr(tgetstr("le", NULL));
+        write(2, " ", 1);
+        i++;
+    }
+}
+
+void    file_printer(t_files *head)
+{
+    t_files         *t;
+    int             len;
+    struct winsize  w;
+    int             col;
+    int             i = 0;
+    int fd = open("/dev/ttys002", O_RDWR);
+
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    len = standard_space(head);
+    t = head;
+    col = 1;
+    dprintf(fd, "this is col == %d this is len == %d\n", w.ws_col, len);
+    if (w.ws_col / (len + 1) > 1)
+        col = (w.ws_col / (len + 1));
+    tputs(tgetstr("cl", NULL), 1, ft_outc);
+    while (t != NULL)
+    {
+        if (t->removed == 0)
+        {
+            //dprintf(fd, "this is i == %d this is col == %d", i, col);
+            if ((i % col) == 0 && i > 0)
+                 tputs(tgetstr("do", NULL), 1, ft_outc);
+            if (t->selected == 1 && t->underline == 1)
+            {
+                tputs(tgetstr("mr", NULL), 1, ft_outc);
+                tputs(tgetstr("us", NULL), 1, ft_outc);
+            }
+            else if (t->underline == 1)
+                tputs(tgetstr("us", NULL), 1, ft_outc);
+            else if (t->selected == 1)
+                tputs(tgetstr("mr", NULL), 1, ft_outc);
+            ft_putstr_fd(t->name, 2);
+            tputs(tgetstr("me", NULL), 1, ft_outc);
+            tputs(tgetstr("ue", NULL), 1, ft_outc);
+            if (t->next)
+                space_adder(t->name, len);
+            i++;
+        }
+        t = t->next;
+    }
+}
+
+void    button_checker(t_files *t,  char *buf, int ret)
+{
+    int i;
+    t_files *head;
+
+    i = -2;
+
+    if (LEFT)
+    {
+        select_left(t);
+        file_printer(t); 
     }
     else if (RIGHT)
     {
-        ft_putstr("first choice");
-         ft_putstr(tgetstr("us", NULL));
-         ft_putstr("second choice");
+        select_right(t);
+        file_printer(t);
     }
-    else if (UP)
+    else if (buf[0] == ' ' && ret == 1)
     {
-        ft_putstr(tgetstr("up", NULL));
+       select_choice(t);
+       file_printer(t);
     }
-    else if (DOWN)
+    else if (buf[0] == 127 && ret == 1)
     {
-        ft_putstr(tgetstr("do", NULL));
+       remove_choice(t);
+       file_printer(t); 
+    }
+    else if (buf[0] == '\n' && ret == 1)
+    {
+        print_selected(t);
+        free_list(t);
+        tcsetattr(STDERR_FILENO, TCSAFLUSH, reset_terminal(NULL));
+        tputs(tgetstr("te", NULL), 1, ft_outc);
+	    tputs(tgetstr("ve", NULL), 1, ft_outc);
+        exit(0);
     }
 }
 
@@ -61,7 +165,7 @@ t_files     *create_node(char *file, int underline)
     new = (t_files *)malloc(sizeof(t_files));
     new->name = ft_strdup(file);
     new->selected = 0;
-    new->selected = 0;
+    new->removed = 0;
     new->underline = underline;
     new->next = NULL;
     new->prev = NULL;
@@ -86,98 +190,84 @@ t_files		*create_list(int ac, char **av)
 	return (head);
 }
 
-t_dimensions *getset(t_dimensions *dim)
+t_files *getset(t_files *dim)
 {
-    static t_dimensions *ret;
+    static t_files *ret;
 
     if (dim)
         ret = dim;
     return ret;
 }
 
+int    space_checker(t_files *head, int colums, int row)
+{
+    int     i;
+    int     len;
+    int     col;
+    t_files *t;
+    //int fd = open("/dev/ttys002", O_RDWR);
+
+    i = 0;
+    col = 1;
+    t = head;
+    len = standard_space(head);
+    if (colums / (len + 1) > 1)
+        col = (colums / (len + 1));
+    while (t)
+    {
+        if (t->removed == 0)
+            i++;
+        t = t->next;
+    }
+    // dprintf(fd, "enaugh space this is space == %d this is i == %d\n", (colums * row), i);
+    if (((colums * row) < (i * (len + 2))) || (col == 1 && i > row))
+        return (0);
+    return (1);
+}
+
 void winsz_handler(int sig) {
-    struct winsize w;
-    t_dimensions   *f;
+    struct winsize  w;
+    t_files         *f;
 
     f = getset(NULL);
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    f->col = w.ws_col;
-    f->row = w.ws_row;
-    const char *s = "winsize changed!\n";
-    write(STDOUT_FILENO, s, strlen(s));
+    if (!space_checker(f, w.ws_col, w.ws_row))
+    {
+       tputs(tgetstr("cl", NULL), 1, ft_outc);
+       ft_putstr_fd("Not enough space", 2);
+    }
+    else
+        file_printer(f);
+}
+
+void    Loop_starter(t_files *t)
+{
+    char            buf[BUFF_SIZ + 1];
+    int             ret;
+    struct winsize  w; 
+
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    while (1)
+    {
+       signal(SIGWINCH, winsz_handler); 
+       ret = read(2, buf, BUFF_SIZ);
+       buf[ret] = '\0';
+       button_checker(t, buf, ret); 
+    }
 }
 
 int main(int ac, char **av, char **env)
 {
-    struct winsize w; 
-    t_dimensions dim;
-    t_files  *t;
+    t_files         *t;
 
+    set_input_mode();
     if (ac > 1)
     {
         t = create_list(ac - 1, av);
-        while (t != NULL)
-        {
-            ft_putstr(tgetstr("us", NULL));
-            // if (t->underline == 1)
-            // {
-            //     ft_putstr(tgetstr("us", NULL));
-            //     ft_putstr(t->name);
-            //    // ft_putstr(tgetstr("ue", NULL));
-            // }
-            // else
-                ft_putstr(t->name);
-            if (t->next)
-                ft_putstr("  ");
-            t = t->next;
-        }
+        getset(t);
+        file_printer(t);
+        Loop_starter(t);
     }
-    // ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    // dim.col = w.ws_col;
-    // dim.row = w.ws_row;
-    // getset(&dim);
-    // while(1)
-    // {
-    //     signal(SIGWINCH, winsz_handler);
-    //     printf ("lines %d\n", dim.row);
-    //     printf ("columns %d\n", dim.col);
-    // }
-    // char    buf[BUFF_SIZ + 1];
-    // int     ret;
-    // t_files  *t;
-
-    // if (ac > 1)
-    // {
-    //     t = create_list(ac - 1, av);
-    //     while (t != NULL)
-    //     {
-    //          printf("this is the first node == %s  %d\n", t->name, t->selected);
-    //          t = t->next;
-    //     }
-    // }
-
-    //set_input_mode();
-    // int  i = 1;
-    // int  k;
-    // while (1)
-    // {
-    //     ret = read(0, buf, BUFF_SIZ);
-    //     //printf("this is ret %d\n", ret);
-    //     buf[ret] = '\0';
-    //     //printf("%d %d %d\n", buf[0], buf[1], buf[2]);
-    //     button_checker(buf);
-    //     k = 0;
-    //     k = open(av[i], O_RDONLY);
-    //     printf("this is k == %d", k);
-    //     if (k > 0)
-    //     {
-    //         while ((read(k, buf, BUFF_SIZ)))
-    //         {
-    //             printf("%s\n", buf);
-    //         }
-    //     }
-    //     else
-    //         printf("%s ", av[i]);
-    //    i++;
-    // }
+    else
+        ft_putstr_fd("No Files Selected\n", 2);
 }
