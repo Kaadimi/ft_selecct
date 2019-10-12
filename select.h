@@ -17,7 +17,8 @@
 # define LEFT (buf[2] == 68 && buf[1] == 91 && buf[0] == 27)
 # define UP (buf[2] == 65 && buf[1] == 91 && buf[0] == 27)
 # define DOWN (buf[2] == 66 && buf[1] == 91 && buf[0] == 27)
-
+# define DELETE (buf[0] == 127 && ret == 1)
+# define DEL (buf[0] == 27 && buf[1] == 91 && buf[2] == 51 && buf[3] == 126)
 
 
 typedef struct			s_files
@@ -33,7 +34,8 @@ typedef struct			s_files
 typedef struct			s_dimesions
 {
 	int					col;
-	int					row;
+	int					len;
+	int					i;
 }						t_dimensions;
 
 void					select_right(t_files *t);
@@ -42,5 +44,16 @@ void    				select_choice(t_files *t);
 void					remove_choice(t_files *t);
 void					free_list(t_files *t);
 void					print_selected(t_files *t);
-struct termios 			*reset_terminal(struct termios *term);
+void					reset_terminal();
 int						ft_outc(int c);
+void					winsz_handler(int sig);
+void    				reset_input_mode();
+void					set_input_mode();
+t_files					*getset(t_files *dim);
+void					signal_handler();
+void    				file_printer(t_files *head);
+void					select_remove_all(t_files *head, int i);
+void    				reset_choices(t_files *head);
+void					finish_him(int sig);
+int         			ft_intlen(const char *str);
+int     				standard_space(t_files *head);
