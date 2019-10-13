@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 15:29:48 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/12 16:35:28 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/13 17:48:34 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,36 +19,17 @@ void		free_list(t_files *t)
 	while (t)
 	{
 		next = t->next;
-		free(t->name);
 		free(t);
 		t = next;
 	}
 	t = NULL;
 }
 
-void		reset_terminal(struct termios term)
-{
-	char			*term_name;
-	struct termios	termios;
-
-	if (!isatty(STDERR_FILENO) || !isatty(STDIN_FILENO))
-		exit(EXIT_FAILURE);
-	term_name = getenv("TERM");
-	if (!term_name)
-		exit(-1);
-	tgetent(NULL, term_name);
-	tcgetattr(STDIN_FILENO, &termios);
-	termios.c_lflag |= ICANON;
-	termios.c_lflag |= ECHO;
-	tcsetattr(STDIN_FILENO, TCSANOW, &termios);
-	tputs(tgetstr("te", NULL), 1, ft_outc);
-	tputs(tgetstr("ve", NULL), 1, ft_outc);
-}
-
 void		finish_him(int sig)
 {
 	t_files *t;
 
+	(void)sig;
 	reset_input_mode();
 	t = getset(NULL);
 	free_list(t);
@@ -57,6 +38,7 @@ void		finish_him(int sig)
 
 void		suspend(int sig)
 {
+	(void)sig;
 	reset_input_mode();
 	signal(SIGTSTP, SIG_DFL);
 	ioctl(0, TIOCSTI, "\32");
@@ -66,6 +48,7 @@ void		restart(int sig)
 {
 	t_files *t;
 
+	(void)sig;
 	t = getset(NULL);
 	set_input_mode();
 	file_printer(t);
