@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 17:07:54 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/13 16:08:25 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/14 10:51:54 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,10 @@ void		select_left(t_files *t, int i)
 {
 	t_files *head;
 
+	if (list_lenght(t) == 1 && i == -1)
+		finish_him(-1);
+	else if (list_lenght(t) == 1 && i == 0)
+		return ;
 	head = t;
 	while (head->removed == 1)
 		head = head->next;

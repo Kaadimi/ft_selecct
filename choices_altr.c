@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 17:10:40 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/13 16:12:11 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/14 10:51:56 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ void		select_right(t_files *head, int i)
 {
 	t_files	*t;
 
+	if (list_lenght(head) == 1 && i == 0)
+		return ;
 	t = head;
 	while (t->next != NULL)
 	{

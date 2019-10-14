@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 16:32:44 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/12 16:34:13 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/14 10:52:46 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,12 @@ void		print_selected(t_files *t)
 	head = t;
 	while (head)
 	{
-		if (head->selected == 1 && t->removed == 0 && virg == 0)
+		if (head->selected == 1 && head->removed == 0 && virg == 0)
 		{
 			ft_putstr(head->name);
 			virg++;
 		}
-		else if (head->selected == 1 && t->removed == 0)
+		else if (head->selected == 1 && head->removed == 0)
 		{
 			ft_putstr(" ");
 			ft_putstr(head->name);

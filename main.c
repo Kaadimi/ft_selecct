@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 15:06:27 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/13 18:07:29 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/14 10:51:58 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,11 @@ void		button_checker_2(t_files *t, char *buf, int ret)
 
 void		button_checker(t_files *t, char *buf, int ret)
 {
+	struct winsize		w;
+
+	ioctl(STDERR_FILENO, TIOCGWINSZ, &w);
+	if (!space_checker(t, w.ws_col, w.ws_row))
+		return ;
 	if (LEFT)
 		select_left(t, 0);
 	else if (RIGHT)

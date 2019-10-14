@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 14:27:00 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/13 16:12:59 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/13 18:09:48 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void		select_remove_all(t_files *head, int i)
 	}
 }
 
-void	reset_choices(t_files *head)
+void		reset_choices(t_files *head)
 {
 	t_files *t;
 
@@ -47,7 +47,7 @@ void	reset_choices(t_files *head)
 	}
 }
 
-void	to_end(t_files *t)
+void		to_end(t_files *t)
 {
 	t_files *head;
 
@@ -65,7 +65,7 @@ void	to_end(t_files *t)
 	head->underline = 1;
 }
 
-void	to_start(t_files *t)
+void		to_start(t_files *t)
 {
 	t_files *head;
 
