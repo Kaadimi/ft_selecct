@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 15:29:48 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/14 10:53:07 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/14 15:18:04 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,12 +46,11 @@ void		suspend(int sig)
 
 void		restart(int sig)
 {
-	t_files *t;
+	t_files			*t;
 
-	(void)sig;
 	t = getset(NULL);
 	set_input_mode();
-	file_printer(t);
+	winsz_handler(sig);
 	signal(SIGTSTP, suspend);
 }
 
