@@ -6,11 +6,27 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 16:32:44 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/14 10:52:46 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/18 09:06:24 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "select.h"
+
+size_t		selected_length(t_files *t)
+{
+	t_files		*fake;
+	size_t		i;
+
+	i = 0;
+	fake = t;
+	while (fake)
+	{
+		if (fake->selected == 1)
+			i++;
+		fake = fake->next;
+	}
+	return (i);
+}
 
 void		print_selected(t_files *t)
 {

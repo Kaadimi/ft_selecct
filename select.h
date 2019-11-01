@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/13 17:46:01 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/13 18:09:29 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/18 09:06:09 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@
 # define END (buf[2] == 70 && buf[1] == 91 && buf[0] == 27)
 # define MINUS (buf[0] == '-' && ret == 1)
 # define ALL (buf[0] == '*' && ret == 1)
-# define ENTER (buf[0] == '\n' && ret == 1)
+# define ENTER (buf[0] == '\n' && ret == 1 && selected_length(t) > 0)
 
 typedef struct			s_files
 {
@@ -80,5 +80,6 @@ int						space_checker(t_files *head, int colums, int row);
 void					to_start(t_files *t);
 void					to_end(t_files *t);
 size_t					list_lenght(t_files *t);
+size_t					selected_length(t_files *t);
 
 #endif
