@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 16:39:33 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/12 16:47:56 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/11/15 15:13:19 by ikadimi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,8 @@ void		set_input_mode(void)
 	term_name = getenv("TERM");
 	if (!term_name)
 		exit(-1);
-	tgetent(NULL, term_name);
+	if (!tgetent(NULL, term_name))
+		exit(-1);
 	tcgetattr(STDIN_FILENO, &termios);
 	termios.c_lflag &= ~(ICANON | ECHO);
 	termios.c_cc[VMIN] = 1;
